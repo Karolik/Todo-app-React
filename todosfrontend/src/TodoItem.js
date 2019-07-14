@@ -6,6 +6,7 @@ const TodoItem = ({name, completed, onDelete, onToggle}) => (
        style={{
            textDecoration: completed? 'line-through': 'none'
        }}
+       onClick={onToggle}
       >
        {name}
       </span>
