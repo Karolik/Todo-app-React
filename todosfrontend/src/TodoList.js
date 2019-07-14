@@ -83,7 +83,40 @@ class TodoList extends Component{
 		  return resp.json();
 	   })
 	.then(() => {
-	    const todos = this.state.todos.filter(todo => todo._id !== id);
+		const todos = this.state.todos.filter(todo => todo._id !== id);
+	    this.setState({todos: todos});
+	});
+	}
+	
+	toggleTodo(todo) {
+	  const updateURL = APIURL + todo._id;
+	   return fetch(updateURL, {
+		 method: 'put',
+		 headers: new Headers({
+			 'Content-Type': 'application/json',
+		 }),
+		 body: JSON.stringify({completed: !todo.completed})
+	   })
+		.then(resp => {
+		  if(!resp.ok) {
+			if(resp.status >=400 && resp.status < 500) {
+			  return resp.json().then(data => {
+				let err = {errorMessage: data.message};
+				throw err;
+			  });
+			} else {
+			  let err = {errorMessage: 'Please try again later, server is not responding'};
+			  throw err;
+			}
+		  }
+		  return resp.json();
+	   })
+	.then(updatedTodo => {
+		const todos = this.state.todos.map(t =>
+     	(t._id === updatedTodo._id)
+     	? {...t, completed: !t.completed}
+     	: t
+     	);
 	    this.setState({todos: todos});
 	});
 	}
@@ -94,6 +127,7 @@ class TodoList extends Component{
           key={t._id}
           {...t}
           onDelete={this.deleteTodo.bind(this,t._id)}
+          onToggle={this.toggleTodo.bind(this,t)}
           />
         ));
 		return (
